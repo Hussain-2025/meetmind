@@ -16,8 +16,12 @@ export type AvatarSyncPayload = {
 export const connectSocket = (): Socket => {
   if (socket?.connected) return socket;
 
+  const token = localStorage.getItem('meetmind_token');
+
   socket = io(SOCKET_URL, {
     withCredentials: true,
+    auth: { token },
+    extraHeaders: token ? { Authorization: `Bearer ${token}` } : undefined,
     path: '/socket.io',
     transports: ['websocket', 'polling'],
     autoConnect: true,

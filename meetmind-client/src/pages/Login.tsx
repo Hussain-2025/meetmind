@@ -33,6 +33,12 @@ export const Login: React.FC = () => {
     try {
       setLoading(true);
       const response = await api.post('/auth/login', data);
+      if (response.data.accessToken) {
+        localStorage.setItem('meetmind_token', response.data.accessToken);
+      }
+      if (response.data.refreshToken) {
+        localStorage.setItem('meetmind_refresh_token', response.data.refreshToken);
+      }
       const normalized = normalizeUser(response.data.user);
       setUser(normalized);
       navigate(getPostAuthRedirect(normalized));

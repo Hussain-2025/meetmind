@@ -32,6 +32,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     return res.status(201).json({
       message: "User registered successfully",
       user: formatUserResponse(user),
+      accessToken,
+      refreshToken: newRefreshToken,
     });
   } catch (error) {
     next(error);
@@ -62,6 +64,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     return res.json({
       message: "Logged in successfully",
       user: formatUserResponse(user),
+      accessToken,
+      refreshToken: newRefreshToken,
     });
   } catch (error) {
     next(error);
@@ -79,7 +83,7 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
 
 export const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const refresh = req.cookies?.refreshToken;
+    const refresh = req.cookies?.refreshToken || req.body?.refreshToken || (req.headers["x-refresh-token"] as string | undefined);
     if (!refresh) {
       return res.status(401).json({ message: "Refresh token missing" });
     }
@@ -111,6 +115,8 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
     return res.json({
       message: "Tokens refreshed successfully",
       user: formatUserResponse(user),
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     });
   } catch (error) {
     next(error);

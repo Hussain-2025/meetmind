@@ -14,9 +14,16 @@ export const AuthBootstrap: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const bootstrap = async () => {
       try {
-        const res = await api.post('/auth/refresh-token');
+        const refreshToken = localStorage.getItem('meetmind_refresh_token');
+        const res = await api.post('/auth/refresh-token', { refreshToken });
         if (!cancelled && res.data?.user) {
           setUser(normalizeUser(res.data.user));
+          if (res.data.accessToken) {
+            localStorage.setItem('meetmind_token', res.data.accessToken);
+          }
+          if (res.data.refreshToken) {
+            localStorage.setItem('meetmind_refresh_token', res.data.refreshToken);
+          }
         }
       } catch (refreshErr: unknown) {
         const refreshStatus = (refreshErr as { response?: { status?: number } })?.response?.status;
@@ -29,6 +36,8 @@ export const AuthBootstrap: React.FC<{ children: React.ReactNode }> = ({ childre
           const profileStatus = (profileErr as { response?: { status?: number } })?.response?.status;
           if (!cancelled && (refreshStatus === 401 || profileStatus === 401)) {
             setUser(null);
+            localStorage.removeItem('meetmind_token');
+            localStorage.removeItem('meetmind_refresh_token');
           }
         }
       } finally {

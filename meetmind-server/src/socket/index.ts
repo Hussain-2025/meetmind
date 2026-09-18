@@ -25,10 +25,21 @@ export interface AvatarUpdatePayload {
 const authenticateSocket = (socket: Socket): { id: string; role: string } | null => {
   try {
     const rawCookie = socket.handshake.headers.cookie;
-    if (!rawCookie) return null;
+    let token = "";
 
-    const cookies = parseCookies(rawCookie);
-    const token = cookies.accessToken;
+    if (rawCookie) {
+      const cookies = parseCookies(rawCookie);
+      token = cookies.accessToken || "";
+    }
+
+    if (!token && socket.handshake.auth?.token) {
+      token = socket.handshake.auth.token;
+    }
+
+    if (!token && socket.handshake.headers.authorization) {
+      token = socket.handshake.headers.authorization.replace(/^Bearer\s+/i, "");
+    }
+
     if (!token) return null;
 
     const decoded = jwt.verify(token, env.JWT_SECRET) as { id: string; role: string };

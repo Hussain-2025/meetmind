@@ -95,10 +95,13 @@ export const Sidebar: React.FC = () => {
   const handleLogout = async () => {
     try {
       await api.post('/auth/logout');
-      setUser(null);
-      navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
+    } finally {
+      localStorage.removeItem('meetmind_token');
+      localStorage.removeItem('meetmind_refresh_token');
+      setUser(null);
+      navigate('/login');
     }
   };
 

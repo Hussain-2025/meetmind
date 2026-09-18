@@ -11,6 +11,14 @@ export const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('meetmind_token');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 const AUTH_SKIP_REFRESH = ['/auth/login', '/auth/register', '/auth/refresh-token', '/auth/reset-password'];
 
 let isRefreshing = false;
@@ -53,11 +61,20 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      await api.post('/auth/refresh-token');
+      const refreshToken = localStorage.getItem('meetmind_refresh_token');
+      const refreshRes = await api.post('/auth/refresh-token', { refreshToken });
+      if (refreshRes.data?.accessToken) {
+        localStorage.setItem('meetmind_token', refreshRes.data.accessToken);
+      }
+      if (refreshRes.data?.refreshToken) {
+        localStorage.setItem('meetmind_refresh_token', refreshRes.data.refreshToken);
+      }
       processQueue(true);
       sessionHandlers.onSessionRestored?.();
       return api(original);
     } catch {
+      localStorage.removeItem('meetmind_token');
+      localStorage.removeItem('meetmind_refresh_token');
       processQueue(false);
       sessionHandlers.onUnauthorized?.();
       return Promise.reject(error);
