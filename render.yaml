@@ -1,0 +1,32 @@
+﻿services:
+  - type: web
+    name: meetmind-backend
+    runtime: node
+    rootDir: meetmind-server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: ADMIN_EMAIL
+        value: admin@meetmind.ai
+      - key: ADMIN_PASSWORD
+        value: Admin@123!
+      - key: CLIENT_URL
+        value: "*"
